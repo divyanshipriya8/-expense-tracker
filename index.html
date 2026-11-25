@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Money Tracker - Divyanshi</title>
+<style>
+*{box-sizing:border-box;font-family:Arial}
+body{margin:0;background:#0f172a;color:white;padding:15px}
+.top{text-align:center}
+.cards{display:flex;gap:10px;margin:15px 0}
+.c{flex:1;background:#1e293b;padding:15px;border-radius:15px;text-align:center}
+.c h2{margin:5px 0}
+.green{color:#22c55e}.red{color:#ef4444}.blue{color:#38bdf8}
+.box{background:#1e293b;padding:18px;border-radius:16px;max-width:500px;margin:auto}
+input,select{width:100%;padding:12px;margin:6px 0;border-radius:10px;border:none;background:#334155;color:white}
+.btn{width:48%;padding:12px;border:none;border-radius:10px;font-weight:bold;color:white}
+.item{background:#334155;padding:12px;border-radius:12px;margin:8px 0;display:flex;justify-content:space-between;align-items:center}
+.del{background:#ef4444;border:none;color:white;padding:6px 10px;border-radius:8px}
+.filter button{background:#334155;color:white;border:none;padding:8px 12px;border-radius:20px;margin:3px}
+</style>
+</head>
+<body>
+<div class="top"><h1>💰 My Money Tracker</h1><p>By Divyanshi Priya | Smart Paisa Hisab</p></div>
+
+<div class="cards">
+<div class="c"><small>Balance</small><h2 class="blue" id="bal">₹0</h2></div>
+<div class="c"><small>Income</small><h2 class="green" id="inc">₹0</h2></div>
+<div class="c"><small>Expense</small><h2 class="red" id="exp">₹0</h2></div>
+</div>
+
+<div class="box">
+<h3>➕ Add Transaction</h3>
+<input id="title" placeholder="Kya kharcha / kamai? Ex: Mom se mile, Pizza">
+<input id="amt" type="number" placeholder="Amount - Ex: 500">
+<select id="type"><option value="income">💚 Income (Aaya)</option><option value="expense">❤️ Expense (Gaya)</option></select>
+<select id="cat"><option>🍕 Food</option><option>🚗 Travel</option><option>🛍️ Shopping</option><option>📚 Study</option><option>💼 Salary / Pocket Money</option><option>✨ Other</option></select>
+<button class="btn" style="background:#22c55e" onclick="addTx()">Add ✅</button>
+<button class="btn" style="background:#ef4444" onclick="clearAll()">Clear All 🗑️</button>
+
+<h3 style="margin-top:20px">📋 History</h3>
+<div class="filter">
+<button onclick="filterTx('all')">All</button>
+<button onclick="filterTx('income')">Income</button>
+<button onclick="filterTx('expense')">Expense</button>
+</div>
+<div id="list"></div>
+<p id="empty" style="text-align:center;opacity:0.6">Abhi kuch nahi hai, upar se add karo!</p>
+</div>
+
+<script>
+let txs = JSON.parse(localStorage.getItem('divyanshi_money')||'[]');
+let filter='all';
+function save(){localStorage.setItem('divyanshi_money',JSON.stringify(txs)); render();}
+function addTx(){
+let t=document.getElementById('title').value;
+let a=parseFloat(document.getElementById('amt').value);
+let ty=document.getElementById('type').value;
+let c=document.getElementById('cat').value;
+if(!t||!a){alert('Title aur Amount dono bharo!');return;}
+txs.unshift({t,a,ty,c,date:new Date().toLocaleDateString()});
+document.getElementById('title').value='';document.getElementById('amt').value='';
+save();
+}
+function delTx(i){txs.splice(i,1);save();}
+function clearAll(){if(confirm('Sab delete kar du?')){txs=[];save();}}
+function filterTx(f){filter=f;render();}
+function render(){
+let inc=0,exp=0;
+txs.forEach(x=>{if(x.ty=='income')inc+=x.a;else exp+=x.a;});
+document.getElementById('bal').innerText='₹'+(inc-exp);
+document.getElementById('inc').innerText='₹'+inc;
+document.getElementById('exp').innerText='₹'+exp;
+let list=document.getElementById('list');list.innerHTML='';
+let show=txs.filter(x=>filter=='all'||x.ty==filter);
+document.getElementById('empty').style.display=show.length?'none':'block';
+show.forEach((x,idx)=>{
+let realIdx=txs.indexOf(x);
+list.innerHTML+=`<div class="item"><div><b>${x.t}</b><br><small>${x.c} • ${x.date}</small></div><div style="text-align:right"><b class="${x.ty=='income'?'green':'red'}">${x.ty=='income'?'+':'-'}₹${x.a}</b><br><button class="del" onclick="delTx(${realIdx})">Delete</button></div></div>`;
+});
+}
+render();
+</script>
+</body>
+</html>
